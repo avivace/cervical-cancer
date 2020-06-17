@@ -126,9 +126,14 @@ We'll introduce some context and clarifications on the attributes significance t
 \end{figure}
 
 
-
 The target class is highly unbalanced (Figure \ref{unbalanced_biopsy}), with only 6.4\% of positive values.
 The main statistical descriptors have been computed and studied (Figure \ref{numeric_attributes_statistics}). Age distribution is shown in Figure \ref{age_distribution}: the majority of the instances refers to young womans (younger than 15 and older than 38 years old can be considered outliers). Almost all of them had at least one pregnancy (98,1\%).
+
+\subsection{Preliminar Feature selection}
+
+\textbf{Smokes}, \textbf{Hormonal Contraceptives} and \textbf{IUD} have been removed because the correspondings "Years" attributes already provide these informations. \textbf{Dx} is redundant. Attributes with more than 10\% of missing values have been removed.
+
+
 \subsection{Missing Values}
 
 
