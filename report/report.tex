@@ -36,6 +36,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage[colorinlistoftodos]{todonotes}
 
 \begin{document}
@@ -80,8 +81,11 @@ This year in the US, there will be an estimated 13800 new cases of Cervical canc
 Worldwide, this type of cancer causes makes up 8\% of the total cancer cases and deaths. It's the fourth cause of death from cancer in women, with 260 000 deaths in 2012.
 A lot of progress has been made, and nowadays it is one of the most treatable: when diagnosed and treated at the earliest stage, the five-year survival rate can reach 95\% \cite{cruk}.
 
-The introduction should provide a clear statement of the problem posed by the project, and why the problem is of interest. It should reflect the scenario, if available. If needed, the introduction also needs to present background information so that the reader can understand the significance of the problem. A brief summary of the hypotheses and the approach your group used to solve the problem should be given, possibly also including a concise introduction to theory or concepts used later to analyze and to discuss the results.
+\paragraph{Known causal relations}
 
+HPV causal relation with the cervical cancer has been documented beyond reasonable doubt \cite{Bosch2002}. Additionally, Human papilloma virus (HPV) infection is necessary for the development of CIN, the abnormal growth of cells on the surface of the cervix, indicating a potentially precancerous transformation of cells of the cervix \cite{kumar2017robbins}.
+
+Other risk factors include smoking \cite{Collins2010} early age at the first sexual intercourse and early pregnancies (these two values are also strongly interrelated in most developing countries) \cite{Louie2009}.
 
 \section{Dataset}
 
@@ -92,23 +96,55 @@ The missing values are due to the decision of the patients to not disclose those
 Attributes describe patients’ sexual activity and frequency, age, smoke addiction, usage of contraceptives and diagnosed Sexualy Transmitted Diseases.
 
 We'll introduce some context and clarifications on the attributes significance to outline the relationship between the phenomena described:
-
 \begin{enumerate}
-    \item \textbf{Hormonal Contraceptives} indicates if the patient uses \textit{hormonal} contraceptives.
-    \item \textbf{STDs} indicates if the patient had at least one Sexually Transmitted Disease. It's 1 when at least one of the STDs:condylomatosis, STDs:cervical condylomatosis,STDs:vaginal condylomatosis, STDs:vulvo-perineal condylomatosis, STDs:syphilis, STDs:pelvic inflammatory disease, STDs:genital herpes, STDs:molluscum contagiosum, STDs:AIDS, STDs:HIV, STDs:Hepatitis, STDs:HPV is positive.
+    \item \textbf{Hormonal Contraceptives} indicates if the patient uses \textit{hormonal} contraceptives. \textbf{IUD} indicates the usage of the Intra Uterine contraceptive Device.
+    \item \textbf{STDs} indicates if the patient had at least one Sexually Transmitted Disease. It's 1 when at least one of the STDs:condylomatosis, STDs:cervical condylomatosis, STDs:vaginal condylomatosis, STDs:vulvo-perineal condylomatosis, STDs:syphilis, STDs:pelvic inflammatory disease, STDs:genital herpes, STDs:molluscum contagiosum, STDs:AIDS, STDs:HIV, STDs:Hepatitis, STDs:HPV variables, is positive.
     \item \textbf{STDs:HPV} indicates if the patient was infected by \textit{Human Papilloma Virus}.
     \item \textbf{Dx:HPV} reveals if the patient was already diagnosed with HPV in the past.
-    
-    \item \textbf{Dx:Cancer} is positive if the patient already had cancer.
-    \item \textbf{Dx:CIN} indicates if the patient was affected by Cervical intraepithelial neoplasia (CIN), the abnormal growth of cells on the surface of the cervix.
+    \item \textbf{Dx:Cancer} is positive if the patient already had cancer. It is not clear if this refers to Breast Cancer, as diagnosable by the Oncotype DX test or any type of cancer. The original paper presenting this dataset has no additional information on this \cite{articleUCI}.
+    \item \textbf{Dx:CIN} indicates if the patient was affected by Cervical intraepithelial neoplasia (CIN).
+    \item \textbf{Dx} is positive if at least one of the Dx variables is positive.
+    \item \textbf{Hinselmann}, \textbf{Citology} are two (complementary \cite{Duncan2004}) tests to detect Cervical Cancer. \textbf{Schiller} is another test able to identify abnormal areas to be biopsied and examined.
+    \item \textbf{Biopsy}, our target variable, diagnosing or not the disease.
 \end{enumerate}
 
-HPV causal relation with the cervical cancer has been documented beyond reasonable doubt \cite{Bosch2002}. Additionally, Human papilloma virus (HPV) infection is necessary for the development of CIN \cite{kumar2017robbins}.
-
-In this section the available data sets must be presented. The term dataset refers to any type of information source, for example web services for geolocation fall into this category. 
-In addition, all necessary data manipulation processes, such as cleaning and enrichment with external sources, must be presented and discussed.
-
 \section{The Methodological Approach}
+
+\subsection{Exploration}
+\begin{figure}
+    \centerline{
+        \includegraphics[width=0.4\paperwidth]{figures/age_dist.png}}
+    \caption{Age distribution}
+    \label{age_distribution}
+\end{figure}
+
+\begin{figure}
+    \centerline{
+        \includegraphics[width=0.3\paperwidth]{figures/class_unbalance.png}}
+    \caption{Unbalanced biopsy distribution}
+    \label{unbalanced_biopsy}
+\end{figure}
+
+
+
+The target class is highly unbalanced (Figure \ref{unbalanced_biopsy}), with only 6.4\% of positive values.
+The main statistical descriptors have been computed and studied (Figure \ref{numeric_attributes_statistics}). Age distribution is shown in Figure \ref{age_distribution}: the majority of the instances refers to young womans (younger than 15 and older than 38 years old can be considered outliers). Almost all of them had at least one pregnancy (98,1\%).
+\subsection{Missing Values}
+
+
+\subsection{Correlation}
+
+In this step, we aim to expose relations among variables. There a lot of attributes which information is included in other ones, and many other not linked with the target attribute, we want to proceed filtering those out (feature selection).
+
+Some mentioned causal relations can be seen through this step: early age at first sexual intercourse, number of partners.
+
+\textbf{Dx} is not clearly correlated with Biopsy, probably because the type of cancer it refers to it's unrelated (Breast).
+
+Even if it's been shown that smoking it's a risk factor for CIN, the potential initial step of a Cervical Cancer, this is not visibile in this dataset.
+
+
+\subsection{Class imbalance}
+\subsection{Classification}
 
 This is the central and most important section of the report. Its objective must be to show, with linearity and clarity, the steps that have led to the definition of a decision model. The description of the working hypotheses, confirmed or denied, can be found in this section together with the description of the subsequent refining processes of the models. Comparisons between different models (e.g. heuristics vs. optimal models) in terms of quality of solutions, their explainability and execution times are welcome. 
 
@@ -135,8 +171,25 @@ The discussion section aims at interpreting the results in light of the project'
 \section{Conclusions}
 Conclusions should summarize the central points made in the Discussion section, reinforcing for the reader the value and implications of the work. If the results were not definitive, specific future work that may be needed can be (briefly) described. The conclusions should never contain ``surprises''. Therefore, any conclusions should be based on observations and data already discussed. It is considered extremely bad form to introduce new data in the conclusions.
 
-
 \bibliographystyle{IEEEtran}
 \bibliography{references.bib}
+
+\clearpage
+\onecolumn
+\section{Appendix}
+
+\begin{figure}[H]
+    \centerline{
+        \includegraphics[width=0.95\paperwidth]{figures/numeric_statistics.pdf}}
+    \caption{Numeric attributes statistics}
+    \label{numeric_attributes_statistics}
+\end{figure}
+
+\begin{figure}[H]
+    \centerline{
+        \includegraphics[width=0.9\paperwidth]{figures/scatter.png}}
+    \caption{Scatter Matrix of Age, Number of sexual partners, First sexual intercourse, Biopsy}
+    \label{scatter}
+\end{figure}
 
 \end{document}
