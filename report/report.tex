@@ -31,13 +31,16 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[10pt,technote]{IEEEtran}
+\documentclass[12pt,technote]{IEEEtran}
 \usepackage[english]{babel}
 \usepackage[utf8x]{inputenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage[colorinlistoftodos]{todonotes}
+
+% Tables
+\usepackage{multirow}
 
 \begin{document}
 
@@ -58,7 +61,7 @@
 %----------------------------------------------------------------------------------------
 
 \HRule \\[0.6cm]
-{ \huge Cervical cancer exploratory study}\\ % Title of your document
+{ \huge Cervical cancer risk exploratory study}\\ % Title of your document
 \HRule \\[1.0cm]
  
 %----------------------------------------------------------------------------------------
@@ -72,51 +75,73 @@ Antonio Vivace - 793509 a.vivace1@campus.unimib.it \\[1cm] % Your name
 \end{center}
 
 \begin{abstract}
-The ABSTRACT is not a part of the body of the report itself. Rather, the abstract is a brief summary of the report contents that is often separately circulated so potential readers can decide whether to read the report. The abstract should very concisely summarize the whole report: why it was written, what was discovered or developed, and what is claimed to be the significance of the effort. The abstract does not include figures or tables, and only the most significant numerical values or results should be given.
+
+Cervical Cancer is one of the most treatable cancers when diagnosed at early stages. Yet, it killed 311000 women in 2018 and it's still the fourth cause of death from cancers in women, the second most common in developing areas, mainly because of the economic cost and the difficulties in implementing effectives screening programmes. Data Mining provides robust tools to verify the known causal relations and assess risk factors from medical datasets. Classification models can then exploit this scenario to help identifying groups of population at higer risk to improve planning of screening programmes.
+
+
+
 \end{abstract}
 
 \section{Introduction}
 
 This year in the US, there will be an estimated 13800 new cases of Cervical cancer. 4290 will be deadly \cite{acs}.
-Worldwide, this type of cancer causes makes up 8\% of the total cancer cases and deaths. It's the fourth cause of death from cancer in women, with 260 000 deaths in 2012.
-A lot of progress has been made, and nowadays it is one of the most treatable: when diagnosed and treated at the earliest stage, the five-year survival rate can reach 95\% \cite{cruk}.
+Worldwide, this type of cancer causes makes up 8\% of the total cancer cases and deaths. It's the fourth (second in developing countries \cite{Catarino2015}) cause of death from cancer in women.
+A lot of progress has been made, and nowadays it is one of the most curable: when diagnosed and treated at the earliest stages, the five-year survival rate can reach 95\% \cite{cruk}.
 
+In this work, we investigate the possibility of classifying high-risk patients from demographic and other medical data, but excluding the results of other related exams.
+
+\begin{figure}
+    \centerline{
+        \includegraphics[width=0.4\paperwidth]{figures/age_dist.pdf}}
+    \caption{Age distribution}
+    \label{age_distribution}
+\end{figure}
 \paragraph{Known causal relations}
 
 HPV causal relation with the cervical cancer has been documented beyond reasonable doubt \cite{Bosch2002}. Additionally, Human papilloma virus (HPV) infection is necessary for the development of CIN, the abnormal growth of cells on the surface of the cervix, indicating a potentially precancerous transformation of cells of the cervix \cite{kumar2017robbins}.
 
-Other risk factors include smoking \cite{Collins2010} early age at the first sexual intercourse and early pregnancies (these two values are also strongly interrelated in most developing countries) \cite{Louie2009}.
+Risk factors include smoking, \cite{Collins2010} early age at the first sexual intercourse and early pregnancies.
 
 \section{Dataset}
 
-The dataset was collected at 'Hospital Universitario de Caracas' in Caracas, Venezuela. The dataset comprises demographic information, habits, and historic medical records of 858 patients.
+The dataset was collected at 'Hospital Universitario de Caracas' in Caracas, Venezuela.
+
+36 attributes describe demographic informations, sexual activity and frequency, pregnancies, age, smoke addiction, usage of contraceptives and diagnosed Sexualy Transmitted Diseases of 858 women patients.
+
+\begin{figure}
+    \centerline{
+        \includegraphics[width=0.3\paperwidth]{figures/corr.png}}
+    \caption{Correlation Matrix on the numeric attributes of the starting dataset}
+    \label{correlation_matrix}
+\end{figure}
+
 
 The missing values are due to the decision of the patients to not disclose those details because of privacy concerns.
 
-Attributes describe patients’ sexual activity and frequency, age, smoke addiction, usage of contraceptives and diagnosed Sexualy Transmitted Diseases.
+We'll introduce some context and clarifications on the attributes significance to outline the relationship with the disease:
 
-We'll introduce some context and clarifications on the attributes significance to outline the relationship between the phenomena described:
-\begin{enumerate}
+\begin{itemize}
     \item \textbf{Hormonal Contraceptives} indicates if the patient uses \textit{hormonal} contraceptives. \textbf{IUD} indicates the usage of the Intra Uterine contraceptive Device.
-    \item \textbf{STDs} indicates if the patient had at least one Sexually Transmitted Disease. It's 1 when at least one of the STDs:condylomatosis, STDs:cervical condylomatosis, STDs:vaginal condylomatosis, STDs:vulvo-perineal condylomatosis, STDs:syphilis, STDs:pelvic inflammatory disease, STDs:genital herpes, STDs:molluscum contagiosum, STDs:AIDS, STDs:HIV, STDs:Hepatitis, STDs:HPV variables, is positive.
-    \item \textbf{STDs:HPV} indicates if the patient was infected by \textit{Human Papilloma Virus}.
+    \item \textbf{STDs} indicates if the patient had at least one Sexually Transmitted Disease. It's positive when at least one of the STDs:condylomatosis, STDs:cervical condylomatosis, STDs:vaginal condylomatosis, STDs:vulvo-perineal condylomatosis, STDs:syphilis, STDs:pelvic inflammatory disease, STDs:genital herpes, STDs:molluscum contagiosum, STDs:AIDS, STDs:HIV, STDs:Hepatitis, STDs:HPV attributes is positive.
+    \item \textbf{STDs:HPV} indicates if the patient is infected by the \textit{Human Papilloma Virus}.
     \item \textbf{Dx:HPV} reveals if the patient was already diagnosed with HPV in the past.
     \item \textbf{Dx:Cancer} is positive if the patient already had cancer. It is not clear if this refers to Breast Cancer, as diagnosable by the Oncotype DX test or any type of cancer. The original paper presenting this dataset has no additional information on this \cite{articleUCI}.
     \item \textbf{Dx:CIN} indicates if the patient was affected by Cervical intraepithelial neoplasia (CIN).
     \item \textbf{Dx} is positive if at least one of the Dx variables is positive.
-    \item \textbf{Hinselmann}, \textbf{Citology} are two (complementary \cite{Duncan2004}) tests to detect Cervical Cancer. \textbf{Schiller} is another test able to identify abnormal areas to be biopsied and examined.
-    \item \textbf{Biopsy}, our target variable, diagnosing or not the disease.
-\end{enumerate}
+    \item \textbf{Hinselmann} and \textbf{Citology} are two (complementary \cite{Duncan2004}) tests to detect Cervical Cancer. \textbf{Schiller} is another test able to identify abnormal areas to be biopsied and examined.
+    \item \textbf{Biopsy} is a medical procedure providing a confirmation of the diagnosis through a \textit{colposcopy}, a magnified visual inspection of the cervix. This attribute has been chosen as our target.
+\end{itemize}
 
 \section{The Methodological Approach}
 
-\subsection{Exploration}
 \begin{figure}
     \centerline{
-        \includegraphics[width=0.4\paperwidth]{figures/age_dist.png}}
-    \caption{Age distribution}
-    \label{age_distribution}
+        \includegraphics[width=0.25\paperwidth]{figures/boxplot1.png}}
+    \caption{Biopsy VS number of pregnancies conditional box plot}
+    \label{cond_box_plot}
 \end{figure}
+
+\subsection{Exploration}
 
 \begin{figure}
     \centerline{
@@ -125,76 +150,160 @@ We'll introduce some context and clarifications on the attributes significance t
     \label{unbalanced_biopsy}
 \end{figure}
 
-
 The target class is highly unbalanced (Figure \ref{unbalanced_biopsy}), with only 6.4\% of positive values.
-The main statistical descriptors have been computed and studied (Figure \ref{numeric_attributes_statistics}). Age distribution is shown in Figure \ref{age_distribution}: the majority of the instances refers to young womans (younger than 15 and older than 38 years old can be considered outliers). Almost all of them had at least one pregnancy (98,1\%).
 
-\subsection{Preliminar Feature selection}
+The main statistical descriptors have been computed and studied. Age distribution is shown in Figure \ref{age_distribution}: the majority of the instances refers to young women (younger than 15 and older than 38 years old can be considered outliers). Almost all of them had at least one pregnancy (98,1\%).
 
-\textbf{Smokes}, \textbf{Hormonal Contraceptives} and \textbf{IUD} have been removed because the correspondings "Years" attributes already provide these informations. \textbf{Dx} is redundant. Attributes with more than 10\% of missing values have been removed.
+\subsection{Feature Selection}
 
+We decided to exclude the other tests (\textbf{Hinselmann}, \textbf{Citology}, \textbf{Schiller}) since, by conception, they share a similar purpose with the target \textbf{Biopsy}.
+
+\textbf{STDs:Time since first diagnosis} and \textbf{STDs:Time since last diagnosis} are missing in more than 90\% of the records and were filtered out.
+
+\textbf{STDs:cervical condylomatosis} and \textbf{STDs:AIDS}, \textbf{STDs:pelvic inflammatory disease}, \textbf{STDs: molluscum contagiosum}, \textbf{STDs:Hepatitis B} and \textbf{STDs:HPV} were removed because they had more than 99.995\% negative (or missing) values.
+
+Finally, \textbf{Smokes}, \textbf{Hormonal Contraceptives} and \textbf{IUD} were removed because the correspondings "Years" attributes already provide these informations.
 
 \subsection{Missing Values}
 
+Missing values have been imputed with the conditioned average value per Age class. 5 Age classes with same frequency have been created, using the \textit{Equal frequency unsupervised discretization method}: 13-19, 19-23, 23,28, 28-34, 34-84.
+
+Finally, to avoid inv the Z-Score Normalization has been applied.
+
+After this steps, the dataset has 20 normalized attributes and no missing values:
+
+\begin{itemize}
+    \item Age
+    \item Number of sexual partners
+    \item First sexual intercourse
+    \item Num of pregnancies
+    \item Smokes (years)
+    \item Smokes (packs/year)
+    \item Hormonal Contraceptives (years)
+    \item IUD (years)
+    \item STDs (number)
+    \item STDs:condylomatosis
+    \item STDs:vaginal condylomatosis
+    \item STDs:vulvo-perineal condylomatosis
+    \item STDs:syphilis
+    \item STDs:genital herpes
+    \item STDs:HIV
+    \item STDs: Number of diagnosis
+    \item Dx:Cancer
+    \item Dx:CIN
+    \item Dx:HPV
+    \item Biopsy
+\end{itemize}
 
 \subsection{Correlation}
 
-In this step, we aim to expose relations among variables. There a lot of attributes which information is included in other ones, and many other not linked with the target attribute, we want to proceed filtering those out (feature selection).
-
-Some mentioned causal relations can be seen through this step: early age at first sexual intercourse, number of partners.
+Some mentioned causal relations can be seen through this step: early age at first sexual intercourse, number of pregnancies.
 
 \textbf{Dx} is not clearly correlated with Biopsy, probably because the type of cancer it refers to it's unrelated (Breast).
 
+The other tests (\textbf{Hinselmann}, \textbf{Citology}, \textbf{Schiller}) are obviously very correlated with Biopsy (Figure \ref{correlation_matrix}).
+
+\begin{figure}
+    \centerline{
+        \includegraphics[width=0.25\paperwidth]{figures/exams_corr.png}}
+    \caption{Correlation matrix of Cervical Cancer exams}
+    \label{cond_box_plot}
+\end{figure}
+
 Even if it's been shown that smoking it's a risk factor for CIN, the potential initial step of a Cervical Cancer, this is not visibile in this dataset.
 
-
 \subsection{Class imbalance}
+
+Two approaches have been experimented to handle this issue: oversampling with SMOTE (\cite{Chawla2011}) and the usage of cost-sensitive Random Forest classificator.
+
+To avoid inflating metrics, SMOTE oversampling has been applied only on the training sets.
+
+The cost-sensitive model makes use of the cost matrix shown in Table \ref{table:confusion_matrix}, to try to minimize the False Negative Rate. The cost given to False Negatives (ignoring when a cancer is present) is 10 times the cost of False Positives (flagging a cancer even when it's not true).
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{lllll}
+                                             &          &                                           &          & \\
+        \multirow{2}{*}{}                    &          & \multicolumn{2}{l}{\textbf{Ground Truth}} &            \\
+                                             &          & Positive                                  & Negative & \\
+        \multirow{2}{*}{\textbf{Prediction}} & Positive & 1.0                                       & 1.0       & \\
+                                             & Negative & 10.0                                      & 1.0       &
+    \end{tabular}
+    \caption{Cost Matrix}
+    \label{table:confusion_matrix}
+\end{table}
+
+\begin{table}[]
+\begin{tabular}{ll}
+Attribute                          & Importance          \\
+First sexual intercourse           & 2.5964373464373462  \\
+Hormonal Contraceptives (years)    & 2.126984126984127   \\
+Number of sexual partners          & 1.593911719939117   \\
+Age                                & 1.196969696969697   \\
+Num of pregnancies                 & 1.0419717887154862  \\
+STDs (number)                      & 0.8303292827102351  \\
+Dx:HPV                             & 0.8073291050035236  \\
+Dx:Cancer                          & 0.720280437756498   \\
+STDs: Number of diagnosis          & 0.4703452178834182  \\
+Smokes (years)                     & 0.38181818181818183 \\
+Smokes (packs/year)                & 0.37965816755393667 \\
+IUD (years)                        & 0.3663967611336032  \\
+STDs:HIV                           & 0.35227272727272724 \\
+STDs:vulvo-perineal condylomatosis & 0.28707870787078704 \\
+STDs:condylomatosis                & 0.2577920377160817  \\
+STDs:syphilis                      & 0.152191894127378   \\
+Dx:CIN                             & 0.14195402298850573 \\
+STDs:vaginal condylomatosis        & 0.08712121212121213 \\
+STDs:genital herpes                & 0.05130718954248366
+\end{tabular}
+\caption{Feature importance, according to the Random Forest (SMOTE) model (all levels).}
+\label{table:feature_importance}
+
+\end{table}
+
 \subsection{Classification}
 
-This is the central and most important section of the report. Its objective must be to show, with linearity and clarity, the steps that have led to the definition of a decision model. The description of the working hypotheses, confirmed or denied, can be found in this section together with the description of the subsequent refining processes of the models. Comparisons between different models (e.g. heuristics vs. optimal models) in terms of quality of solutions, their explainability and execution times are welcome. 
+The following models have been tested, using a 5-Fold stratified cross validation learning: Random Forest and Logistic Regression. The features used are the selected one, while the split dataset (1/3, 2/3) and oversampled ones are being (separately) used (SMOTE and cost matrix).
 
-Do not attempt to describe all the code in the system, and do not include large pieces of code in this section, use pseudo-code where necessary. Complete source code should be provided separately (in Appendixes, as separated material or as a link to an on-line repo). Instead pick out and describe just the pieces of code which, for example:
-\begin{itemize}
-\item are especially critical to the operation of the system;
-\item you feel might be of particular interest to the reader for some reason;
-\item  illustrate a non-standard or innovative way of implementing an algorithm, data
-structure, etc..
-\end{itemize}
+Overview of the different configuration tried:
+\begin{enumerate}
+    \item SMO with non-oversampled dataset (split 2/3 and 1/3)
+    \item SMO with SMOTE oversampling
+    \item Random Forest with non-oversampled dataset (split 2/3 and 1/3)
+    \item Random Forest with SMOTE
+    \item Random Forest with Cost Matrix
+    \end{enumerate}
 
-You should also mention any unforeseen problems you encountered when implementing the
-system and how and to what extent you overcame them. Common problems are:
- difficulties involving existing software.
+Higher number of folds are infeasible since the dataset is highly unbalanced. These metrics are computed and compared: Accuracy, Precision, Recall and F1 Score.
+
+The trained Random Forest model is used to extract the importance (see Figure \ref{table:feature_importance}) of the attributes. This step is very informative and can be used as a feature selector for other models and can highlight risk factors.
+
+Importance from the RandomForest model is computed from the Splits and Candidates values:
+
+$$\text{Importance}_i = \frac{\text{splits}_i}{\text{candidates}_i} $$
+
+Where i is the level. The KNIME implementations gives 3 levels and we sum them all.
+
+\section{Results and conclusions}
+
+Exploring medical datasets on can help validate the causal relations, but predicting a diagnosis without any targeted test or exam, having only partial information on behaviours related to risk factors is definitely a challenging task and we didn't get excellent results.
+
+Perfomance of the classificators can appear unsatisfying, but this work provides a baseline where additional data and more complex ML tools can exploit additional (and less unbalanced) datasets. Furthermore, exploiting trained models to rank risk factors can help build more relevant datasets, providing guidelines on which values and aspects about patients should be investigated and mined.
 
 
-\section{Results and Evaluation}
-The Results section is dedicated to presenting the actual results (i.e. measured and calculated quantities), not to discussing their meaning or interpretation. The results should be summarized using appropriate Tables and Figures (graphs or schematics). Every Figure and Table should have a legend that describes concisely what is contained or shown. Figure legends go below the figure, table legends above the table. Throughout the report, but especially in this section, pay attention to reporting numbers with an appropriate number of significant figures. 
+On the other hand, classificators results improve drastically when tests targeted to the same disease are available. This is expected, as each of exam have large medical literature describing their accuracy and diagnosing power.
 
-\section{Discussion}
-The discussion section aims at interpreting the results in light of the project's objectives. The most important goal of this section is to interpret the results so that the reader is informed of the insight or answers that the results provide. This section should also present an evaluation of the particular approach taken by the group. For example: Based on the results, how could the experimental procedure be improved? What additional, future work may be warranted? What recommendations can be drawn?
+Oversampling medical data with SMOTE also didn't show any particular enhancement, as the instances are syntethic and tend to overrepresent particular patterns, thus confusing the classificators or not getting any improvement at all. The dataset also had a really low and unbalanced number of positive cases, on a already largely biased sample (Age distribution of patients, pregnancies).
 
+Correctly evaluating the bias and the sample distribution from which the instances are sampled can also help in understanding how to handle the missing values. Here, our missing-imputation strategy keeps (and actually empowers) the bias, effectively supposing that if someone didn't answer, the truth should be similar to their peers (similar age, similar geographic provenience, ...). Since missing values weren't a minor issue, and they are due to privacy concerns, this is mostly a cultural consideration. A possible additional experimentation could be to change this approach.
 
-\section{Conclusions}
-Conclusions should summarize the central points made in the Discussion section, reinforcing for the reader the value and implications of the work. If the results were not definitive, specific future work that may be needed can be (briefly) described. The conclusions should never contain ``surprises''. Therefore, any conclusions should be based on observations and data already discussed. It is considered extremely bad form to introduce new data in the conclusions.
+However, the Correlation Analysis and the Feature importance extraction shows how the attributes related to known risk factors are popping out as the most important (\ref{table:feature_importance}), and reflect the known causal relations we mentioned. Having richer datasets, providing more complete details about the medical history of the patient could lead to more accurate results and could enable proper clustering of patient population, suggesting the ones subject to higher risks.
+
+Furthermore, cultural details plays a fundamental role in sexual habits and STDs related issues, but these elements are non-trivial to tackle and proper factor in medical machine learning models. E.g., it's been shown that early age at the first sexual intercourse and early pregnancies are strongly \textit{interrelated} in most developing countries \cite{Louie2009}.
+
+Bigger, richer and more complete datasets, including socio-economical and ethnic data on the patients could lead to intersting investigations and improve this strategy to highlight and cluster high-risk groups.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references.bib}
-
-\clearpage
-\onecolumn
-\section{Appendix}
-
-\begin{figure}[H]
-    \centerline{
-        \includegraphics[width=0.95\paperwidth]{figures/numeric_statistics.pdf}}
-    \caption{Numeric attributes statistics}
-    \label{numeric_attributes_statistics}
-\end{figure}
-
-\begin{figure}[H]
-    \centerline{
-        \includegraphics[width=0.9\paperwidth]{figures/scatter.png}}
-    \caption{Scatter Matrix of Age, Number of sexual partners, First sexual intercourse, Biopsy}
-    \label{scatter}
-\end{figure}
 
 \end{document}
