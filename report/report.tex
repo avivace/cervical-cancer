@@ -214,11 +214,11 @@ Even if it's been shown that smoking it's a risk factor for CIN, the potential i
 
 \subsection{Class imbalance}
 
-Two approaches have been experimented to handle this issue: oversampling with SMOTE (\cite{Chawla2011}) and the usage of cost-sensitive Random Forest classificator.
+Two approaches have been experimented to handle this issue: oversampling with SMOTE (\cite{Chawla2011}) and the usage of cost-sensitive versions of classificators.
 
 To avoid inflating metrics, SMOTE oversampling has been applied only on the training sets.
 
-The cost-sensitive model makes use of the cost matrix shown in Table \ref{table:confusion_matrix}, to try to minimize the False Negative Rate. The cost given to False Negatives (ignoring when a cancer is present) is 10 times the cost of False Positives (flagging a cancer even when it's not true).
+The cost-sensitive models make use of the cost matrix shown in Table \ref{table:confusion_matrix}, to try to minimize the False Negative Rate. The cost given to False Negatives (ignoring when a cancer is present) is 10 times the cost of False Positives (flagging a cancer even when it's not true). We decide to accept some false diagnosis to try to lose less positives.
 
 \begin{table}[]
     \centering
@@ -229,7 +229,7 @@ The cost-sensitive model makes use of the cost matrix shown in Table \ref{table:
         \multirow{2}{*}{\textbf{Prediction}} & Positive & 1.0                                       & 1.0       & \\
                                              & Negative & 10.0                                      & 1.0       &
     \end{tabular}
-    \caption{Cost Matrix}
+    \caption{Proposed Cost Matrix}
     \label{table:confusion_matrix}
 \end{table}
 
@@ -267,14 +267,15 @@ The following models have been tested, using a 5-Fold stratified cross validatio
 
 Overview of the different configuration tried:
 \begin{enumerate}
-    \item SMO with non-oversampled dataset (split 2/3 and 1/3)
-    \item SMO with SMOTE oversampling
+    \item Logistic Regression with non-oversampled dataset (split 2/3 and 1/3)
+    \item Logistic Regression with SMOTE
+    \item Logistic Regression with Cost Matrix
     \item Random Forest with non-oversampled dataset (split 2/3 and 1/3)
     \item Random Forest with SMOTE
     \item Random Forest with Cost Matrix
     \end{enumerate}
 
-Higher number of folds are infeasible since the dataset is highly unbalanced. These metrics are computed and compared: Accuracy, Precision, Recall and F1 Score.
+Higher number of folds are infeasible since the dataset is highly unbalanced. These metrics are computed and compared: Precision, Recall, Sensitivity, Specifity and F1 Score.
 
 The trained Random Forest model is used to extract the importance (see Figure \ref{table:feature_importance}) of the attributes. This step is very informative and can be used as a feature selector for other models and can highlight risk factors.
 
@@ -284,20 +285,91 @@ $$\text{Importance}_i = \frac{\text{splits}_i}{\text{candidates}_i} $$
 
 Where i is the level. The KNIME implementations gives 3 levels and we sum them all.
 
-\section{Results and conclusions}
+\section{Results}
 
-Exploring medical datasets on can help validate the causal relations, but predicting a diagnosis without any targeted test or exam, having only partial information on behaviours related to risk factors is definitely a challenging task and we didn't get excellent results.
+\subsection{Metrics}
 
-Perfomance of the classificators can appear unsatisfying, but this work provides a baseline where additional data and more complex ML tools can exploit additional (and less unbalanced) datasets. Furthermore, exploiting trained models to rank risk factors can help build more relevant datasets, providing guidelines on which values and aspects about patients should be investigated and mined.
+\begin{table}[]
+    \centering
+    \begin{tabular}{lllll}
+                                             &          &                                           &          & \\
+        \multirow{2}{*}{}                    &          & \multicolumn{2}{l}{\textbf{Ground Truth}} &            \\
+                                             &          & Positive                                  & Negative & \\
+        \multirow{2}{*}{\textbf{Prediction}} & Positive & TP                                        & FP       & \\
+                                             & Negative & FN                                        & TN       &
+    \end{tabular}
+    \caption{Confusion Matrix}
+    \label{table:confusion_matrix}
+\end{table}
 
+Table \ref{table:confusion_matrix} explains the following quantities:
+
+\begin{itemize}
+    \item TP True Positives
+    \item FP False Positives
+    \item FN False Negatives
+    \item TN True Negatives
+\end{itemize}
+
+Intuitively, precision is the ability of the classifier not to label as positive a sample that is negative while recall is a measure of the ability of the classifier to find all the positive samples. \cite{scikit-learn}
+
+
+\begin{equation}
+    TPR = Recall = r = \frac{TP}{TP+FN}
+\end{equation}
+
+\begin{equation}
+    FPR = \frac{FP}{FP+TN}
+\end{equation}
+
+\begin{equation}
+    Precision = p = \frac{TP}{TP+FP}
+\end{equation}
+
+Another metric is the F-measure, defined as follows:
+
+\begin{equation}
+    F_\beta = (1 + \beta^2) \cdot \frac{\mathrm{p} \cdot \mathrm{r}}{(\beta^2 \cdot \mathrm{p}) + \mathrm{r}}
+\end{equation}
+
+Where $\beta$ is a positive real chosen such that recall is considered $\beta$ times as important as precision. In the case $\beta = 1$, we have the $F_1$ score:
+
+\begin{equation}
+    F_1 = 2 \cdot \frac{\mathrm{p} \cdot \mathrm{r}}{\mathrm{p} + \mathrm{r}}
+\end{equation}
+
+\begin{figure}
+    \centerline{
+        \includegraphics[width=0.4\paperwidth]{figures/roc1.png}}
+    \caption{ROC comparison for two configuration of the Logistic Regression model}
+    \label{roc}
+\end{figure}
+
+\subsection{Comparisons}
+
+Metrics are reported in Table \ref{table:class_metrics}. Here we focus on the Recall and F-measure: we want the best model with an high cost on False Negatives. F-measure can also be used when a middleground balance between Precision and Recall is needed and the target class is unbalanced.
+
+Random Forest models gave the highest Accuracy and Specifity, two metrics not relevant here, especially with a so low Recall.
+
+Oversampling didn't affected in a completely positive way the Random Forest model, but helped improving Recall of the basic Logistic Regression model. However, the best value in this sense was obtained by the version sensitive to the Cost Matrix.
+
+Overall, Logistic Regression resulted the best model, reaching 0.389 of Recall and 0.275 of F-Measure (highest values), while keeping a decent value of Accuracy.
+
+Being able to set costs was actually a better strategy than oversampling, probably because of the (too) synthetic instances generated.
+
+Exploring medical datasets on can help validate and investigate causal relations, but predicting a diagnosis without any targeted test or exam, having only partial information on behaviours related to risk factors is definitely a challenging task and we didn't get excellent results.
+
+\section{Conclusions}
+
+Perfomance of the classificators can appear unsatisfying, but this work provides a baseline where additional data and more complex ML tools can exploit additional (and less unbalanced) datasets. Exploiting trained models to rank risk factors can help build more relevant datasets, providing guidelines on which values and aspects about patients should be investigated and mined.
 
 On the other hand, classificators results improve drastically when tests targeted to the same disease are available. This is expected, as each of exam have large medical literature describing their accuracy and diagnosing power.
 
-Oversampling medical data with SMOTE also didn't show any particular enhancement, as the instances are syntethic and tend to overrepresent particular patterns, thus confusing the classificators or not getting any improvement at all. The dataset also had a really low and unbalanced number of positive cases, on a already largely biased sample (Age distribution of patients, pregnancies).
+Oversampling medical data with SMOTE also didn't show any particular enhancement, as the instances are syntethic and tend to over-represent particular patterns, thus confusing the classificators or not getting any improvement at all. The dataset also had a really low and unbalanced number of positive cases, on a already largely biased sample (Age distribution of patients, pregnancies).
 
 Correctly evaluating the bias and the sample distribution from which the instances are sampled can also help in understanding how to handle the missing values. Here, our missing-imputation strategy keeps (and actually empowers) the bias, effectively supposing that if someone didn't answer, the truth should be similar to their peers (similar age, similar geographic provenience, ...). Since missing values weren't a minor issue, and they are due to privacy concerns, this is mostly a cultural consideration. A possible additional experimentation could be to change this approach.
 
-However, the Correlation Analysis and the Feature importance extraction shows how the attributes related to known risk factors are popping out as the most important (\ref{table:feature_importance}), and reflect the known causal relations we mentioned. Having richer datasets, providing more complete details about the medical history of the patient could lead to more accurate results and could enable proper clustering of patient population, suggesting the ones subject to higher risks.
+However, the Correlation Analysis and the Feature importance extraction shows how the attributes related to known risk factors are popping out as the most important (Table \ref{table:feature_importance}), and reflect the known causal relations we mentioned. Having richer datasets, providing more complete details about the medical history of the patient could lead to more accurate results and could enable \textit{proper} clustering of patient population, suggesting the ones subject to higher risks.
 
 Furthermore, cultural details plays a fundamental role in sexual habits and STDs related issues, but these elements are non-trivial to tackle and proper factor in medical machine learning models. E.g., it's been shown that early age at the first sexual intercourse and early pregnancies are strongly \textit{interrelated} in most developing countries \cite{Louie2009}.
 
@@ -305,5 +377,25 @@ Bigger, richer and more complete datasets, including socio-economical and ethnic
 
 \bibliographystyle{IEEEtran}
 \bibliography{references.bib}
+
+\onecolumn
+\begin{table}[]
+\begin{tabular}{lllllll}
+Classifier                                                                     & Recall & Precision & Sensitivity & Specifity & F-Measure & Accuracy \\
+\begin{tabular}[c]{@{}l@{}}Logistic Regression,\\ non-oversampled\end{tabular} & 0.056  & 0.5       & 0.056       & 0.996     & 0.1       & 0.937    \\
+Logistic Regression, SMOTE oversampling                                        & 0.333  & 0.125     & 0.333       & 0.844     & 0.182     & 0.819    \\
+Logistic Regression, Cost Matrix                                               & 0.389  & 0.212     & 0.389       & 0.903     & 0.275     & 0.871    \\
+\begin{tabular}[c]{@{}l@{}}Random Forest,\\ non-oversampled\end{tabular}       & 0.056  & 0.167     & 0.056       & 0.981     & 0.083     & 0.923    \\
+Random Forest, SMOTE oversampling                                              & 0.056  & 0.143     & 0.056       & 0.978     & 0.08      & 0.92     \\
+Random Forest, Cost Matrix                                                     & 0.111  & 0.133     & 0.111       & 0.952     & 0.121     & 0.899    
+\end{tabular}
+\caption{Classificator metrics in the main configurations. 5 K-Fold Cross Validation.}
+\label{table:class_metrics}
+\end{table}
+
+
+
+
+\twocolumn
 
 \end{document}
