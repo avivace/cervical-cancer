@@ -3,9 +3,9 @@
 Final project for the *Data and Text Mining* course, master in Computer Science. [KNIME workflow](https://github.com/avivace/cervical-cancer/blob/master/cervix.knwf), [Report PDF](https://github.com/avivace/cervical-cancer/blob/master/report.pdf).
 
 Cervical Cancer is one of the most treatable
-cancers when diagnosed at early stages. Yet, it killed
+cancers when diagnosed at early stages. Yet, **it killed
 311000 women in 2018 and it’s still the fourth cause of
-death from cancers in women, the second most common
+death from cancers in women**, the second most common
 in developing areas, mainly because of the economic cost
 and the difficulties in implementing effectives screening
 programmes. Data Mining provides robust tools to verify
@@ -36,11 +36,8 @@ related exams.
 with the cervical cancer has been documented be-
 yond reasonable doubt. Additionally, the *Human
 papilloma virus* infection is necessary for the development 
-of CIN, the abnormal growth of cells
+of *CIN*, the abnormal growth of cells
 on the surface of the cervix, indicating a potentially
 precancerous transformation of cells of the cervix.
 Risk factors include smoking, early age at the
 first sexual intercourse and early pregnancies.
-
-![](https://github.com/avivace/cervical-cancer/raw/master/report/figures/boxplot1.png)
-
