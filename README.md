@@ -1,6 +1,6 @@
 # Cervical Cancer exploratory study
 
-Final project for the *Data and Text Mining* course, from my [master in Computer Science](https://github.com/avivace). [KNIME workflow](https://github.com/avivace/cervical-cancer/blob/master/cervix.knwf), [Report PDF](https://github.com/avivace/cervical-cancer/blob/master/report.pdf).
+Final project for the *Data and Text Mining* course, from my [master in Computer Science](https://github.com/avivace/compsci). [KNIME workflow](https://github.com/avivace/cervical-cancer/blob/master/cervix.knwf), [Report PDF](https://github.com/avivace/cervical-cancer/blob/master/report.pdf).
 
 Cervical Cancer is one of the most treatable
 cancers when diagnosed at early stages. Yet, **it killed
